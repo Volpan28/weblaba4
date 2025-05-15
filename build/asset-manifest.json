@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/Volpan28/LetsAchive4.github.io/static/css/main.6cb99b44.css",
+    "main.js": "/Volpan28/LetsAchive4.github.io/static/js/main.f5fc18ca.js",
+    "static/media/push-ups.jpg": "/Volpan28/LetsAchive4.github.io/static/media/push-ups.d7400113388785f78a2f.jpg",
+    "static/media/discipline-focus.jpg": "/Volpan28/LetsAchive4.github.io/static/media/discipline-focus.a7724e47e9e9a21dd7af.jpg",
+    "index.html": "/Volpan28/LetsAchive4.github.io/index.html",
+    "main.6cb99b44.css.map": "/Volpan28/LetsAchive4.github.io/static/css/main.6cb99b44.css.map",
+    "main.f5fc18ca.js.map": "/Volpan28/LetsAchive4.github.io/static/js/main.f5fc18ca.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.6cb99b44.css",
+    "static/js/main.f5fc18ca.js"
+  ]
+}
