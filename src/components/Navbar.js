@@ -37,7 +37,12 @@ function Navbar() {
                 </ul>
                 <div className="sign-buttons">
                     {user ? (
-                        <button onClick={handleSignOut}>Sign Out</button>
+                        <>
+                            <Link to="/account">
+                                <button>Account</button>
+                            </Link>
+                            <button onClick={handleSignOut}>Sign Out</button>
+                        </>
                     ) : (
                         <>
                             <Link to="/login">
