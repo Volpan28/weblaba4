@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Redirecting...</title>
+  <script>
+    // Зберігаємо повний шлях і переходимо на головну сторінку
+    sessionStorage.redirect = location.pathname + location.search + location.hash;
+    location.replace("/weblaba4/");
+  </script>
+</head>
+<body>
+<p>Redirecting...</p>
+</body>
+</html>
