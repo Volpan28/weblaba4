@@ -144,14 +144,17 @@ const Goals = () => {
             completed: !goal.completed,
             postponed: false,
             streak: `${goal.completed ? Math.max(0, currentStreak - 1) : currentStreak + 1}-day streak`,
-            completedAt: !goal.completed ? serverTimestamp() : null, // Додаємо timestamp при позначенні як completed
+            completedAt: !goal.completed ? serverTimestamp() : null,
+            endDate: !goal.completed ? serverTimestamp() : null // ⬅️ додано
         };
+
         if (updatedGoal.completed && updatedGoal.timerId) {
             clearInterval(updatedGoal.timerId);
             updatedGoal.timerId = null;
         } else if (!updatedGoal.completed && updatedGoal.notificationInterval) {
             setupNotificationTimer(updatedGoal);
         }
+
         try {
             const goalRef = doc(db, "goals", goal.id);
             await updateDoc(goalRef, {
@@ -159,8 +162,10 @@ const Goals = () => {
                 postponed: updatedGoal.postponed,
                 streak: updatedGoal.streak,
                 timerId: updatedGoal.timerId,
-                completedAt: updatedGoal.completedAt, // Оновлюємо completedAt у Firestore
+                completedAt: updatedGoal.completedAt,
+                endDate: updatedGoal.endDate
             });
+
             if (!goal.completed) {
                 setNotifications(prev => [
                     ...prev,
@@ -194,7 +199,7 @@ const Goals = () => {
     };
 
     const addGoal = async (title, deadline, image) => {
-        if (!user) return; // Перевірка автентифікації
+        if (!user) return;
 
         const [deadlineNumber, deadlineUnit] = deadline.split(" ");
         try {
@@ -209,7 +214,9 @@ const Goals = () => {
                 totalDays: convertToDays(parseInt(deadlineNumber), deadlineUnit),
                 notificationInterval: null,
                 timerId: null,
-                completedAt: null, // Додаємо completedAt як null за замовчуванням
+                completedAt: null,
+                startDate: serverTimestamp(),
+                endDate: null
             });
             setNotificationText(`Goal "${title}" created successfully!`);
             setShowNotification(true);
