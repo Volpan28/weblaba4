@@ -1,13 +1,9 @@
-require('dotenv').config();
 const express = require('express');
 const admin = require('firebase-admin');
 const cors = require('cors');
 const path = require('path');
 
-// Логування для дебагу
-console.log('FIREBASE_PROJECT_ID:', process.env.FIREBASE_PROJECT_ID);
-console.log('FIREBASE_CLIENT_EMAIL:', process.env.FIREBASE_CLIENT_EMAIL);
-console.log('FIREBASE_PRIVATE_KEY:', process.env.FIREBASE_PRIVATE_KEY ? 'Defined' : 'Undefined');
+require('dotenv').config();
 
 const app = express();
 app.use(cors());
@@ -33,18 +29,22 @@ try {
 
 const db = admin.firestore();
 
-// Маршрут GET для отримання цілей, відфільтрованих за датою
+// Маршрут для отримання цілей
 app.get('/api/goals', async (req, res) => {
     try {
-        const { startDate, endDate } = req.query;
-        if (!startDate || !endDate) {
-            return res.status(400).json({ error: 'startDate and endDate are required' });
+        const { startDate, endDate, userId } = req.query;
+        if (!startDate || !endDate || !userId) {
+            return res.status(400).json({ error: 'startDate, endDate, and userId are required' });
         }
+
+        const start = new Date(startDate).getTime() / 1000;
+        const end = new Date(endDate).getTime() / 1000;
 
         const goalsRef = db.collection('goals');
         const snapshot = await goalsRef
-            .where('completedAt', '>=', new Date(startDate))
-            .where('completedAt', '<=', new Date(endDate))
+            .where('userId', '==', userId)
+            .where('completedAt.seconds', '>=', start)
+            .where('completedAt.seconds', '<=', end)
             .get();
 
         const goals = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -55,13 +55,24 @@ app.get('/api/goals', async (req, res) => {
     }
 });
 
-// Маршрут POST для збереження нової цілі
+// Маршрут для збереження цілей
 app.post('/api/goals', async (req, res) => {
     try {
+        const { title, userId } = req.body;
+        if (!title || !userId) {
+            return res.status(400).json({ error: 'title and userId are required' });
+        }
+
+        const completedAt = new Date();
         const goal = {
-            ...req.body,
-            completedAt: new Date() // Додаємо поле часу виконання
+            title,
+            userId,
+            completedAt: {
+                seconds: Math.floor(completedAt.getTime() / 1000),
+                nanoseconds: (completedAt.getTime() % 1000) * 1000000,
+            },
         };
+
         const docRef = await db.collection('goals').add(goal);
         res.status(201).json({ id: docRef.id, ...goal });
     } catch (error) {
@@ -70,8 +81,10 @@ app.post('/api/goals', async (req, res) => {
     }
 });
 
-// Хостинг статичних файлів (React build)
+// Хостинг статичних файлів
 app.use(express.static(path.join(__dirname, '../build')));
+
+// Обробка маршрутів SPA
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../build', 'index.html'));
 });
