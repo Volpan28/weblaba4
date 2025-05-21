@@ -29,7 +29,7 @@ try {
 
 const db = admin.firestore();
 
-// Маршрут для отримання цілей (залишаємо без змін, хоча він зараз не використовується)
+// Маршрут для отримання цілей
 app.get('/api/goals', async (req, res) => {
     try {
         const { startDate, endDate, userId } = req.query;
@@ -37,25 +37,33 @@ app.get('/api/goals', async (req, res) => {
             return res.status(400).json({ error: 'startDate, endDate, and userId are required' });
         }
 
-        const start = new Date(startDate).getTime() / 1000;
-        const end = new Date(endDate).getTime() / 1000;
+        // Перевірка і форматування дат
+        const start = new Date(startDate + 'T00:00:00Z').getTime() / 1000;
+        const end = new Date(endDate + 'T23:59:59Z').getTime() / 1000;
+        console.log(`Querying goals for userId: ${userId}, start: ${start}, end: ${end}`);
 
         const goalsRef = db.collection('goals');
-        const snapshot = await goalsRef
-            .where('userId', '==', userId)
-            .where('completedAt.seconds', '>=', start)
-            .where('completedAt.seconds', '<=', end)
-            .get();
+        // Отримуємо всі цілі користувача
+        const userGoalsSnapshot = await goalsRef.where('userId', '==', userId).get();
 
-        const goals = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        res.json(goals);
+        // Фільтруємо вручну
+        const goals = [];
+        userGoalsSnapshot.forEach(doc => {
+            const data = doc.data();
+            const completedAtSeconds = data.completedAt?.seconds;
+            if (completedAtSeconds && completedAtSeconds >= start && completedAtSeconds <= end) {
+                goals.push({ id: doc.id, ...data });
+            }
+        });
+
+        res.json(goals.length > 0 ? goals : []);
     } catch (error) {
         console.error('Error fetching goals:', error);
-        res.status(500).json({ error: 'Failed to fetch goals' });
+        res.status(500).json({ error: 'Failed to fetch goals', details: error.message });
     }
 });
 
-// Маршрут для збереження цілей (оновлюємо для узгодження з Goals.js)
+// Маршрут для збереження цілей
 app.post('/api/goals', async (req, res) => {
     try {
         const { title, userId } = req.body;
@@ -67,12 +75,12 @@ app.post('/api/goals', async (req, res) => {
         const goal = {
             title,
             userId,
-            image: '/images/push-ups.jpg', // Додаємо за замовчуванням, як у Goals.js
+            image: '/images/push-ups.jpg',
             streak: '0-day streak',
-            deadline: '1 днів', // Додаємо за замовчуванням
+            deadline: '1 днів',
             completed: false,
             postponed: false,
-            totalDays: 1, // Відповідно до deadline "1 днів"
+            totalDays: 1,
             notificationInterval: null,
             timerId: null,
             completedAt: {
