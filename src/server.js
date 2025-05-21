@@ -29,7 +29,7 @@ try {
 
 const db = admin.firestore();
 
-// Маршрут для отримання цілей
+// Маршрут для отримання цілей (залишаємо без змін, хоча він зараз не використовується)
 app.get('/api/goals', async (req, res) => {
     try {
         const { startDate, endDate, userId } = req.query;
@@ -55,7 +55,7 @@ app.get('/api/goals', async (req, res) => {
     }
 });
 
-// Маршрут для збереження цілей
+// Маршрут для збереження цілей (оновлюємо для узгодження з Goals.js)
 app.post('/api/goals', async (req, res) => {
     try {
         const { title, userId } = req.body;
@@ -67,6 +67,14 @@ app.post('/api/goals', async (req, res) => {
         const goal = {
             title,
             userId,
+            image: '/images/push-ups.jpg', // Додаємо за замовчуванням, як у Goals.js
+            streak: '0-day streak',
+            deadline: '1 днів', // Додаємо за замовчуванням
+            completed: false,
+            postponed: false,
+            totalDays: 1, // Відповідно до deadline "1 днів"
+            notificationInterval: null,
+            timerId: null,
             completedAt: {
                 seconds: Math.floor(completedAt.getTime() / 1000),
                 nanoseconds: (completedAt.getTime() % 1000) * 1000000,
