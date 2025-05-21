@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/weblaba4/static/css/main.6cb99b44.css",
-    "main.js": "/weblaba4/static/js/main.5c98bdb2.js",
+    "main.js": "/weblaba4/static/js/main.9192c694.js",
     "static/media/push-ups.jpg": "/weblaba4/static/media/push-ups.d7400113388785f78a2f.jpg",
     "static/media/discipline-focus.jpg": "/weblaba4/static/media/discipline-focus.a7724e47e9e9a21dd7af.jpg",
     "index.html": "/weblaba4/index.html",
     "main.6cb99b44.css.map": "/weblaba4/static/css/main.6cb99b44.css.map",
-    "main.5c98bdb2.js.map": "/weblaba4/static/js/main.5c98bdb2.js.map"
+    "main.9192c694.js.map": "/weblaba4/static/js/main.9192c694.js.map"
   },
   "entrypoints": [
     "static/css/main.6cb99b44.css",
-    "static/js/main.5c98bdb2.js"
+    "static/js/main.9192c694.js"
   ]
 }
