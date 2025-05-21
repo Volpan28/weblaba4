@@ -9,6 +9,22 @@ import "firebase/compat/analytics";
 import "firebase/compat/remote-config";
 import "firebase/compat/performance";
 
+// Додай конфігурацію Firebase (отримай із Firebase Console)
+const firebaseConfig = {
+    apiKey: "AIzaSyBq-fFZc02anVs21f2TK5R36Lhet4LYqfg",
+    authDomain: "web-labs-713bc.firebaseapp.com",
+    projectId: "web-labs-713bc",
+    storageBucket: "web-labs-713bc.firebasestorage.app",
+    messagingSenderId: "179529533146",
+    appId: "1:179529533146:web:2affe03423b2141d2407e3",
+    measurementId: "G-V198GRXTH1",
+};
+
+// Ініціалізуй Firebase
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     const loadEl = document.getElementById("load");
 

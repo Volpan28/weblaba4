@@ -10,6 +10,7 @@ import {
     doc,
     updateDoc,
     deleteDoc,
+    serverTimestamp,
 } from "firebase/firestore";
 import GoalCard from "../components/GoalCard";
 import Notification from "../components/Notification";
@@ -40,7 +41,7 @@ const Goals = () => {
     const filteredGoals = goals.filter(goal => {
         if (filter === 'active') return !goal.completed && !goal.postponed;
         if (filter === 'completed') return goal.completed;
-        if (filter === 'postponed') return goal.postponed && !goal.completed;
+        if (filter === 'postponed') return goal.postoned && !goal.completed;
         return true;
     });
 
@@ -143,6 +144,7 @@ const Goals = () => {
             completed: !goal.completed,
             postponed: false,
             streak: `${goal.completed ? Math.max(0, currentStreak - 1) : currentStreak + 1}-day streak`,
+            completedAt: !goal.completed ? serverTimestamp() : null, // Додаємо timestamp при позначенні як completed
         };
         if (updatedGoal.completed && updatedGoal.timerId) {
             clearInterval(updatedGoal.timerId);
@@ -157,6 +159,7 @@ const Goals = () => {
                 postponed: updatedGoal.postponed,
                 streak: updatedGoal.streak,
                 timerId: updatedGoal.timerId,
+                completedAt: updatedGoal.completedAt, // Оновлюємо completedAt у Firestore
             });
             if (!goal.completed) {
                 setNotifications(prev => [
@@ -206,6 +209,7 @@ const Goals = () => {
                 totalDays: convertToDays(parseInt(deadlineNumber), deadlineUnit),
                 notificationInterval: null,
                 timerId: null,
+                completedAt: null, // Додаємо completedAt як null за замовчуванням
             });
             setNotificationText(`Goal "${title}" created successfully!`);
             setShowNotification(true);
