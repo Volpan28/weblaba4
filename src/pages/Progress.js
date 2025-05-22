@@ -3,6 +3,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../firebase";
 import ProgressBox from "../components/ProgressBox";
 
+
 function Progress() {
     const [user] = useAuthState(auth);
     const [goals, setGoals] = useState([]);

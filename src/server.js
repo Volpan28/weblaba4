@@ -95,10 +95,11 @@ app.post('/api/goals', async (req, res) => {
 });
 
 // Хостинг статичних файлів із папки build
-app.use(express.static(path.join(__dirname, '../build')));
-
-// Обробка маршрутів SPA
+app.use(express.static(path.join(__dirname, '../build'), { setHeaders: (res) => {
+        console.log('Serving static file from:', path.join(__dirname, '../build'));
+    }}));
 app.get('*', (req, res) => {
+    console.log('Serving index.html from:', path.join(__dirname, '../build', 'index.html'));
     res.sendFile(path.join(__dirname, '../build', 'index.html'));
 });
 

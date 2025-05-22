@@ -8,12 +8,12 @@ import Progress from "./pages/Progress";
 import Community from "./pages/Community";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import Account from "./pages/Account"; // Імпортуємо новий компонент
+import Account from "./pages/Account";
 import PrivateRoute from "./components/PrivateRoute";
 
 function App() {
     return (
-        <Router basename="/weblaba4">
+        <Router basename="/"> {/* Змінюємо basename на "/" */}
             <div className="App">
                 <Navbar />
                 <Routes>
@@ -52,7 +52,7 @@ function App() {
                             </PrivateRoute>
                         }
                     />
-                    <Route path="*" element={<div><h1>404 - Page Not Found</h1><a href="/weblaba4">Go to Home</a></div>} />
+                    <Route path="*" element={<div><h1>404 - Page Not Found</h1><a href="/">Go to Home</a></div>} /> {/* Оновлюємо посилання */}
                 </Routes>
                 <Footer />
             </div>
