@@ -37,8 +37,8 @@ app.get('/api/goals', async (req, res) => {
             return res.status(400).json({ error: 'startDate, endDate, and userId are required' });
         }
 
-        const start = new Date(startDate + 'T00:00:00Z').getTime() / 1000;
-        const end = new Date(endDate + 'T23:59:59Z').getTime() / 1000;
+        const start = new Date(startDate).getTime() / 1000;
+        const end = new Date(endDate).getTime() / 1000;
         console.log(`Querying goals for userId: ${userId}, start: ${start}, end: ${end}`);
 
         const goalsRef = db.collection('goals');
