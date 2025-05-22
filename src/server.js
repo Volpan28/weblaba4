@@ -9,7 +9,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Ініціалізація Firebase Admin
 try {
     if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_PRIVATE_KEY || !process.env.FIREBASE_CLIENT_EMAIL) {
         throw new Error('One or more Firebase environment variables are not defined');
@@ -29,7 +28,6 @@ try {
 
 const db = admin.firestore();
 
-// Маршрут для отримання всіх цілей
 app.get('/api/goals', async (req, res) => {
     try {
         const { startDate, endDate, userId } = req.query;
@@ -60,7 +58,6 @@ app.get('/api/goals', async (req, res) => {
     }
 });
 
-// Новий маршрут для отримання виконаних цілей
 app.get('/api/completed-goals', async (req, res) => {
     try {
         const { startDate, endDate, userId } = req.query;
@@ -75,7 +72,7 @@ app.get('/api/completed-goals', async (req, res) => {
         const goalsRef = db.collection('goals');
         const userGoalsSnapshot = await goalsRef
             .where('userId', '==', userId)
-            .where('completed', '==', true) // Фільтруємо лише виконані цілі
+            .where('completed', '==', true)
             .get();
 
         const completedGoals = [];
@@ -94,12 +91,21 @@ app.get('/api/completed-goals', async (req, res) => {
     }
 });
 
-// Маршрут для збереження цілей
 app.post('/api/goals', async (req, res) => {
     try {
         const { title, userId } = req.body;
         if (!title || !userId) {
             return res.status(400).json({ error: 'title and userId are required' });
+        }
+
+        const goalsRef = db.collection('goals');
+        const duplicateGoalSnapshot = await goalsRef
+            .where('userId', '==', userId)
+            .where('title', '==', title)
+            .get();
+
+        if (!duplicateGoalSnapshot.empty) {
+            return res.status(400).json({ error: 'A goal with this title already exists' });
         }
 
         const completedAt = new Date();
@@ -124,14 +130,12 @@ app.post('/api/goals', async (req, res) => {
         res.status(201).json({ id: docRef.id, ...goal });
     } catch (error) {
         console.error('Error saving goal:', error);
-        res.status(500).json({ error: 'Failed to save goal' });
+        res.status(500).json({ error: 'Failed to save goal', details: error.message });
     }
 });
 
-// Хостинг статичних файлів із папки build
 app.use(express.static(path.join(__dirname, '../build')));
 
-// Обробка маршрутів SPA
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../build', 'index.html'));
 });

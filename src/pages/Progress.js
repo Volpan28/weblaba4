@@ -9,6 +9,7 @@ function Progress() {
     const [completedGoals, setCompletedGoals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [newGoalTitle, setNewGoalTitle] = useState('');
+    const [errorMessage, setErrorMessage] = useState(''); // Новий стан для повідомлення про помилку
 
     useEffect(() => {
         if (user) {
@@ -35,11 +36,11 @@ function Progress() {
                 try {
                     const startDate = '2025-05-18T00:00:00Z';
                     const endDate = '2025-05-23T23:59:59Z';
-                    console.log(`Fetching completed goals for userId: ${user.uid}`); // Додаткове логування
+                    console.log(`Fetching completed goals for userId: ${user.uid}`);
                     const response = await fetch(
                         `/api/completed-goals?startDate=${startDate}&endDate=${endDate}&userId=${user.uid}`
                     );
-                    console.log('Completed goals response status:', response.status); // Додаткове логування
+                    console.log('Completed goals response status:', response.status);
                     if (!response.ok) {
                         throw new Error(`HTTP error! Status: ${response.status}`);
                     }
@@ -72,14 +73,19 @@ function Progress() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ title: newGoalTitle, userId: user.uid }),
             });
+
+            const responseData = await response.json();
+
             if (!response.ok) {
-                throw new Error('Failed to add goal');
+                throw new Error(responseData.error || 'Failed to add goal');
             }
-            const newGoal = await response.json();
-            setGoals([...goals, newGoal]);
+
+            setGoals([...goals, responseData]);
             setNewGoalTitle('');
+            setErrorMessage(''); // Очистити повідомлення про помилку
         } catch (error) {
             console.error('Error adding goal:', error);
+            setErrorMessage(error.message); // Показати повідомлення про помилку
         }
     };
 
@@ -103,6 +109,7 @@ function Progress() {
                             />
                             <button type="submit">Add Goal</button>
                         </form>
+                        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>} {/* Відображення помилки */}
                         <div className="progress-boxes">
                             <h2>All Goals</h2>
                             {goals.length > 0 ? (
