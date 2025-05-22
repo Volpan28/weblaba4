@@ -29,7 +29,6 @@ try {
 
 const db = admin.firestore();
 
-// Маршрут для отримання цілей
 app.get('/api/goals', async (req, res) => {
     try {
         const { startDate, endDate, userId } = req.query;
@@ -60,7 +59,39 @@ app.get('/api/goals', async (req, res) => {
     }
 });
 
-// Маршрут для збереження цілей
+app.get('/api/completed-goals', async (req, res) => {
+    try {
+        const { startDate, endDate, userId } = req.query;
+        if (!startDate || !endDate || !userId) {
+            return res.status(400).json({ error: 'startDate, endDate, and userId are required' });
+        }
+
+        const start = new Date(startDate + 'T00:00:00Z').getTime() / 1000;
+        const end = new Date(endDate + 'T23:59:59Z').getTime() / 1000;
+        console.log(`Querying completed goals for userId: ${userId}, start: ${start}, end: ${end}`);
+
+        const goalsRef = db.collection('goals');
+        const userGoalsSnapshot = await goalsRef
+            .where('userId', '==', userId)
+            .where('completed', '==', true) // Фільтруємо лише виконані цілі
+            .get();
+
+        const completedGoals = [];
+        userGoalsSnapshot.forEach(doc => {
+            const data = doc.data();
+            const completedAtSeconds = data.completedAt?.seconds;
+            if (completedAtSeconds && completedAtSeconds >= start && completedAtSeconds <= end) {
+                completedGoals.push({ id: doc.id, ...data });
+            }
+        });
+
+        res.json(completedGoals.length > 0 ? completedGoals : []);
+    } catch (error) {
+        console.error('Error fetching completed goals:', error);
+        res.status(500).json({ error: 'Failed to fetch completed goals', details: error.message });
+    }
+});
+
 app.post('/api/goals', async (req, res) => {
     try {
         const { title, userId } = req.body;
@@ -94,12 +125,9 @@ app.post('/api/goals', async (req, res) => {
     }
 });
 
-// Хостинг статичних файлів із папки build
-app.use(express.static(path.join(__dirname, '../build'), { setHeaders: (res) => {
-        console.log('Serving static file from:', path.join(__dirname, '../build'));
-    }}));
+app.use(express.static(path.join(__dirname, '../build')));
+
 app.get('*', (req, res) => {
-    console.log('Serving index.html from:', path.join(__dirname, '../build', 'index.html'));
     res.sendFile(path.join(__dirname, '../build', 'index.html'));
 });
 
