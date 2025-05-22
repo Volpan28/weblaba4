@@ -6,7 +6,7 @@ import ProgressBox from "../components/ProgressBox";
 function Progress() {
     const [user] = useAuthState(auth);
     const [goals, setGoals] = useState([]);
-    const [completedGoals, setCompletedGoals] = useState([]); // Новий стан для виконаних цілей
+    const [completedGoals, setCompletedGoals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [newGoalTitle, setNewGoalTitle] = useState('');
 
@@ -19,7 +19,7 @@ function Progress() {
                     const response = await fetch(
                         `/api/goals?startDate=${startDate}&endDate=${endDate}&userId=${user.uid}`
                     );
-                    console.log('Goals response status:', response.status); // Логування для відладки
+                    console.log('Goals response status:', response.status);
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
                     }
@@ -35,12 +35,13 @@ function Progress() {
                 try {
                     const startDate = '2025-05-18T00:00:00Z';
                     const endDate = '2025-05-23T23:59:59Z';
+                    console.log(`Fetching completed goals for userId: ${user.uid}`); // Додаткове логування
                     const response = await fetch(
                         `/api/completed-goals?startDate=${startDate}&endDate=${endDate}&userId=${user.uid}`
                     );
-                    console.log('Completed goals response status:', response.status); // Логування для відладки
+                    console.log('Completed goals response status:', response.status); // Додаткове логування
                     if (!response.ok) {
-                        throw new Error('Network response was not ok');
+                        throw new Error(`HTTP error! Status: ${response.status}`);
                     }
                     const completedGoalsData = await response.json();
                     setCompletedGoals(completedGoalsData);
