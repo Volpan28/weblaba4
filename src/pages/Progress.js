@@ -9,7 +9,7 @@ function Progress() {
     const [completedGoals, setCompletedGoals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [newGoalTitle, setNewGoalTitle] = useState('');
-    const [errorMessage, setErrorMessage] = useState(''); // Новий стан для повідомлення про помилку
+    const [errorMessage, setErrorMessage] = useState('');
 
     useEffect(() => {
         if (user) {
@@ -67,6 +67,7 @@ function Progress() {
         e.preventDefault();
         if (!user) return;
 
+        setErrorMessage(''); // Очистити попереднє повідомлення перед новою спробою
         try {
             const response = await fetch('/api/goals', {
                 method: 'POST',
@@ -82,10 +83,9 @@ function Progress() {
 
             setGoals([...goals, responseData]);
             setNewGoalTitle('');
-            setErrorMessage(''); // Очистити повідомлення про помилку
         } catch (error) {
             console.error('Error adding goal:', error);
-            setErrorMessage(error.message); // Показати повідомлення про помилку
+            setErrorMessage(error.message);
         }
     };
 
@@ -109,7 +109,7 @@ function Progress() {
                             />
                             <button type="submit">Add Goal</button>
                         </form>
-                        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>} {/* Відображення помилки */}
+                        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
                         <div className="progress-boxes">
                             <h2>All Goals</h2>
                             {goals.length > 0 ? (

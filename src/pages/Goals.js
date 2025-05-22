@@ -3,7 +3,6 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth, db } from "../firebase";
 import {
     collection,
-    addDoc,
     query,
     where,
     onSnapshot,
@@ -17,7 +16,7 @@ import Notification from "../components/Notification";
 import image_push from "./images/push-ups.jpg";
 
 const Goals = () => {
-    const [user] = useAuthState(auth); // Отримуємо поточного користувача
+    const [user] = useAuthState(auth);
     const [goals, setGoals] = useState([]);
     const [filter, setFilter] = useState("active");
     const [showNotification, setShowNotification] = useState(false);
@@ -41,7 +40,7 @@ const Goals = () => {
     const filteredGoals = goals.filter(goal => {
         if (filter === 'active') return !goal.completed && !goal.postponed;
         if (filter === 'completed') return goal.completed;
-        if (filter === 'postponed') return goal.postoned && !goal.completed;
+        if (filter === 'postponed') return goal.postponed && !goal.completed;
         return true;
     });
 
@@ -145,7 +144,7 @@ const Goals = () => {
             postponed: false,
             streak: `${goal.completed ? Math.max(0, currentStreak - 1) : currentStreak + 1}-day streak`,
             completedAt: !goal.completed ? serverTimestamp() : null,
-            endDate: !goal.completed ? serverTimestamp() : null // ⬅️ додано
+            endDate: !goal.completed ? serverTimestamp() : null
         };
 
         if (updatedGoal.completed && updatedGoal.timerId) {
@@ -203,23 +202,23 @@ const Goals = () => {
 
         const [deadlineNumber, deadlineUnit] = deadline.split(" ");
         try {
-            await addDoc(collection(db, "goals"), {
-                userId: user.uid,
-                title,
-                image,
-                streak: "0-day streak",
-                deadline,
-                completed: false,
-                postponed: false,
-                totalDays: convertToDays(parseInt(deadlineNumber), deadlineUnit),
-                notificationInterval: null,
-                timerId: null,
-                completedAt: null,
-                startDate: serverTimestamp(),
-                endDate: null
+            const response = await fetch('/api/goals', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, userId: user.uid }),
             });
+
+            const responseData = await response.json();
+
+            if (!response.ok) {
+                throw new Error(responseData.error || 'Failed to add goal');
+            }
+
             setNotificationText(`Goal "${title}" created successfully!`);
             setShowNotification(true);
+
+            // Оновлення локального стану після створення цілі
+            setGoals(prevGoals => [...prevGoals, responseData]);
         } catch (error) {
             setNotificationText(`Failed to create goal: ${error.message}`);
             setShowNotification(true);
