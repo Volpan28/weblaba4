@@ -29,6 +29,7 @@ try {
 
 const db = admin.firestore();
 
+// Маршрут для отримання всіх цілей
 app.get('/api/goals', async (req, res) => {
     try {
         const { startDate, endDate, userId } = req.query;
@@ -59,6 +60,7 @@ app.get('/api/goals', async (req, res) => {
     }
 });
 
+// Новий маршрут для отримання виконаних цілей
 app.get('/api/completed-goals', async (req, res) => {
     try {
         const { startDate, endDate, userId } = req.query;
@@ -66,8 +68,8 @@ app.get('/api/completed-goals', async (req, res) => {
             return res.status(400).json({ error: 'startDate, endDate, and userId are required' });
         }
 
-        const start = new Date(startDate + 'T00:00:00Z').getTime() / 1000;
-        const end = new Date(endDate + 'T23:59:59Z').getTime() / 1000;
+        const start = new Date(startDate).getTime() / 1000;
+        const end = new Date(endDate).getTime() / 1000;
         console.log(`Querying completed goals for userId: ${userId}, start: ${start}, end: ${end}`);
 
         const goalsRef = db.collection('goals');
@@ -92,6 +94,7 @@ app.get('/api/completed-goals', async (req, res) => {
     }
 });
 
+// Маршрут для збереження цілей
 app.post('/api/goals', async (req, res) => {
     try {
         const { title, userId } = req.body;
@@ -125,8 +128,10 @@ app.post('/api/goals', async (req, res) => {
     }
 });
 
+// Хостинг статичних файлів із папки build
 app.use(express.static(path.join(__dirname, '../build')));
 
+// Обробка маршрутів SPA
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../build', 'index.html'));
 });

@@ -3,10 +3,10 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../firebase";
 import ProgressBox from "../components/ProgressBox";
 
-
 function Progress() {
     const [user] = useAuthState(auth);
     const [goals, setGoals] = useState([]);
+    const [completedGoals, setCompletedGoals] = useState([]); // Новий стан для виконаних цілей
     const [loading, setLoading] = useState(true);
     const [newGoalTitle, setNewGoalTitle] = useState('');
 
@@ -19,6 +19,7 @@ function Progress() {
                     const response = await fetch(
                         `/api/goals?startDate=${startDate}&endDate=${endDate}&userId=${user.uid}`
                     );
+                    console.log('Goals response status:', response.status); // Логування для відладки
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
                     }
@@ -27,12 +28,34 @@ function Progress() {
                 } catch (error) {
                     console.error('Error fetching goals:', error);
                     setGoals([]);
-                } finally {
-                    setLoading(false);
                 }
             };
 
-            fetchGoals();
+            const fetchCompletedGoals = async () => {
+                try {
+                    const startDate = '2025-05-18T00:00:00Z';
+                    const endDate = '2025-05-23T23:59:59Z';
+                    const response = await fetch(
+                        `/api/completed-goals?startDate=${startDate}&endDate=${endDate}&userId=${user.uid}`
+                    );
+                    console.log('Completed goals response status:', response.status); // Логування для відладки
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    const completedGoalsData = await response.json();
+                    setCompletedGoals(completedGoalsData);
+                } catch (error) {
+                    console.error('Error fetching completed goals:', error);
+                    setCompletedGoals([]);
+                }
+            };
+
+            const fetchAllData = async () => {
+                await Promise.all([fetchGoals(), fetchCompletedGoals()]);
+                setLoading(false);
+            };
+
+            fetchAllData();
         } else {
             setLoading(false);
         }
@@ -80,10 +103,17 @@ function Progress() {
                             <button type="submit">Add Goal</button>
                         </form>
                         <div className="progress-boxes">
+                            <h2>All Goals</h2>
                             {goals.length > 0 ? (
                                 goals.map((goal) => <ProgressBox key={goal.id} goal={goal} />)
                             ) : (
                                 <p>No goals yet!</p>
+                            )}
+                            <h2>Completed Goals</h2>
+                            {completedGoals.length > 0 ? (
+                                completedGoals.map((goal) => <ProgressBox key={goal.id} goal={goal} />)
+                            ) : (
+                                <p>No completed goals yet!</p>
                             )}
                         </div>
                     </div>
