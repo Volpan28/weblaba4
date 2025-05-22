@@ -1,6 +1,6 @@
 {
   "name": "untitled",
-  "homepage": "https://volpan28.github.io/weblaba4/",
+  "homepage": "",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -13,17 +13,13 @@
     "react-dom": "^19.1.0",
     "react-firebase-hooks": "^5.1.1",
     "react-router-dom": "^7.5.0",
-    "react-scripts": "^5.0.1",
-    "semver": "^7.7.2"
+    "react-scripts": "^5.0.1"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "start-backend": "node src/server.js",
+    "start": "node src/server.js",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": [

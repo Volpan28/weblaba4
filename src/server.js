@@ -37,16 +37,13 @@ app.get('/api/goals', async (req, res) => {
             return res.status(400).json({ error: 'startDate, endDate, and userId are required' });
         }
 
-        // Перевірка і форматування дат
         const start = new Date(startDate + 'T00:00:00Z').getTime() / 1000;
         const end = new Date(endDate + 'T23:59:59Z').getTime() / 1000;
         console.log(`Querying goals for userId: ${userId}, start: ${start}, end: ${end}`);
 
         const goalsRef = db.collection('goals');
-        // Отримуємо всі цілі користувача
         const userGoalsSnapshot = await goalsRef.where('userId', '==', userId).get();
 
-        // Фільтруємо вручну
         const goals = [];
         userGoalsSnapshot.forEach(doc => {
             const data = doc.data();
@@ -97,7 +94,7 @@ app.post('/api/goals', async (req, res) => {
     }
 });
 
-// Хостинг статичних файлів
+// Хостинг статичних файлів із папки build
 app.use(express.static(path.join(__dirname, '../build')));
 
 // Обробка маршрутів SPA
