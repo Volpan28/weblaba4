@@ -200,12 +200,11 @@ const Goals = () => {
     const addGoal = async (title, deadline, image) => {
         if (!user) return;
 
-        const [deadlineNumber, deadlineUnit] = deadline.split(" ");
         try {
             const response = await fetch('/api/goals', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title, userId: user.uid }),
+                body: JSON.stringify({ title, userId: user.uid, deadline }),
             });
 
             const responseData = await response.json();
@@ -220,6 +219,7 @@ const Goals = () => {
             // Оновлення локального стану після створення цілі
             setGoals(prevGoals => [...prevGoals, responseData]);
         } catch (error) {
+            console.error('Error creating goal:', error);
             setNotificationText(`Failed to create goal: ${error.message}`);
             setShowNotification(true);
         }

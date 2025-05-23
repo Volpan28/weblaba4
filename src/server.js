@@ -94,48 +94,64 @@ app.get('/api/completed-goals', async (req, res) => {
     }
 });
 
-// Маршрут для збереження цілей
+// Функція для конвертації дедлайну в дні
+const convertToDays = (number, unit) => {
+    switch (unit) {
+        case 'днів': return number;
+        case 'тижнів': return number * 7;
+        case 'місяців': return number * 30;
+        case 'років': return number * 365;
+        default: return number || 1;
+    }
+};
+
 app.post('/api/goals', async (req, res) => {
     try {
-        const { title, userId } = req.body;
+        const { title, userId, deadline } = req.body;
         if (!title || !userId) {
             return res.status(400).json({ error: 'title and userId are required' });
         }
 
-        // Перевірка на дублікати
-        const goalsRef = db.collection('goals');
-        console.log(`Checking for duplicate title: "${title}" for userId: ${userId}`); // Логування для відладки
-        const duplicateGoalSnapshot = await goalsRef
-            .where('userId', '==', userId)
-            .where('title', '==', title)
-            .get();
+        const normalizedTitle = title.trim().toLowerCase();
+        console.log(`Checking duplicate for normalized title: "${normalizedTitle}" and userId: ${userId}`);
 
-        if (!duplicateGoalSnapshot.empty) {
-            console.log(`Duplicate found for title: "${title}" and userId: ${userId}`); // Логування
+        const goalsRef = db.collection('goals');
+        const userGoalsSnapshot = await goalsRef.where('userId', '==', userId).get();
+
+        let isDuplicate = false;
+        userGoalsSnapshot.forEach(doc => {
+            const existingGoal = doc.data();
+            const existingTitle = existingGoal.title?.trim().toLowerCase();
+            if (existingTitle === normalizedTitle) {
+                isDuplicate = true;
+                console.log(`Duplicate found: existing title "${existingGoal.title}" matches "${normalizedTitle}"`);
+            }
+        });
+
+        if (isDuplicate) {
             return res.status(400).json({ error: 'A goal with this title already exists' });
         }
-        console.log(`No duplicate found for title: "${title}" and userId: ${userId}`); // Логування
+        console.log(`No duplicate found for title: "${title}" (normalized: "${normalizedTitle}") and userId: ${userId}`);
 
-        const completedAt = new Date();
+        const [deadlineNumber, deadlineUnit] = deadline ? deadline.split(" ") : [1, "днів"];
         const goal = {
             title,
             userId,
             image: '/images/push-ups.jpg',
             streak: '0-day streak',
-            deadline: '1 днів',
+            deadline: deadline || '1 днів',
             completed: false,
             postponed: false,
-            totalDays: 1,
+            totalDays: convertToDays(parseInt(deadlineNumber), deadlineUnit),
             notificationInterval: null,
             timerId: null,
-            completedAt: {
-                seconds: Math.floor(completedAt.getTime() / 1000),
-                nanoseconds: (completedAt.getTime() % 1000) * 1000000,
-            },
+            completedAt: null,
+            startDate: admin.firestore.FieldValue.serverTimestamp(),
+            endDate: null,
         };
 
         const docRef = await db.collection('goals').add(goal);
-        console.log(`Goal created with ID: ${docRef.id}`); // Логування
+        console.log(`Goal created with ID: ${docRef.id}`);
         res.status(201).json({ id: docRef.id, ...goal });
     } catch (error) {
         console.error('Error saving goal:', error);
@@ -143,10 +159,8 @@ app.post('/api/goals', async (req, res) => {
     }
 });
 
-// Хостинг статичних файлів із папки build
 app.use(express.static(path.join(__dirname, '../build')));
 
-// Обробка маршрутів SPA
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../build', 'index.html'));
 });
