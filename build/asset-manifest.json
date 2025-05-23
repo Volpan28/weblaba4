@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/static/css/main.6cb99b44.css",
-    "main.js": "/static/js/main.319b00c6.js",
+    "main.js": "/static/js/main.18d58e9e.js",
     "static/media/push-ups.jpg": "/static/media/push-ups.d7400113388785f78a2f.jpg",
     "static/media/discipline-focus.jpg": "/static/media/discipline-focus.a7724e47e9e9a21dd7af.jpg",
     "index.html": "/index.html",
     "main.6cb99b44.css.map": "/static/css/main.6cb99b44.css.map",
-    "main.319b00c6.js.map": "/static/js/main.319b00c6.js.map"
+    "main.18d58e9e.js.map": "/static/js/main.18d58e9e.js.map"
   },
   "entrypoints": [
     "static/css/main.6cb99b44.css",
-    "static/js/main.319b00c6.js"
+    "static/js/main.18d58e9e.js"
   ]
 }
